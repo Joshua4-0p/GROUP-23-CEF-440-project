@@ -1,0 +1,90 @@
+// src/models/User.js
+const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
+
+const userSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+      minlength: 2,
+      maxlength: 50,
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+      match: [
+        /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/,
+        "Please enter a valid email",
+      ],
+    },
+    password: {
+      type: String,
+      required: true,
+      minlength: 6,
+    },
+    picture: {
+      type: String,
+      default: null,
+    },
+    deviceId: {
+      type: String,
+      default: null,
+    },
+    preferences: {
+      network: {
+        type: String,
+        enum: ["MTN", "Orange", "Camtel"],
+        default: "MTN",
+      },
+      anonymize: {
+        type: Boolean,
+        default: false,
+      },
+      dataSharing: {
+        type: Boolean,
+        default: true,
+      },
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+// Hash password before saving
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
+
+  try {
+    const salt = await bcrypt.genSalt(12);
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Compare password method
+userSchema.methods.comparePassword = async function (candidatePassword) {
+  return bcrypt.compare(candidatePassword, this.password);
+};
+
+// Remove password from JSON output
+userSchema.methods.toJSON = function () {
+  const userObject = this.toObject();
+  delete userObject.password;
+  return userObject;
+};
+
+module.exports = mongoose.model("User", userSchema);
+// This model defines the User schema with fields for name, email, password, picture, deviceId, preferences, and isActive status.
+// It includes methods for hashing passwords, comparing passwords, and removing the password field from JSON output
