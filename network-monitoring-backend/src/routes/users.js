@@ -9,24 +9,103 @@ const {
 } = require("../controllers/userController");
 const auth = require("../middleware/auth");
 
-// @route   GET /api/users/profile
-// @desc    Get user profile
-// @access  Private
+/**
+ * @swagger
+ * tags:
+ *   name: Users
+ *   description: User management
+ */
+
+/**
+ * @swagger
+ * /users/profile:
+ *   get:
+ *     summary: Get user profile
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: The user profile
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       401:
+ *         description: Unauthorized
+ */
 router.get("/profile", auth, getProfile);
 
-// @route   PUT /api/users/profile
-// @desc    Update user profile
-// @access  Private
+/**
+ * @swagger
+ * /users/profile:
+ *   put:
+ *     summary: Update user profile
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UserUpdate'
+ *     responses:
+ *       200:
+ *         description: The updated user profile
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ */
 router.put("/profile", auth, updateProfile);
 
-// @route   POST /api/users/upload-picture
-// @desc    Upload profile picture
-// @access  Private
+/**
+ * @swagger
+ * /users/upload-picture:
+ *   post:
+ *     summary: Upload profile picture
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               profilePicture:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Profile picture uploaded successfully
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ */
 router.post("/upload-picture", auth, uploadProfilePicture);
 
-// @route   DELETE /api/users/account
-// @desc    Delete user account
-// @access  Private
+/**
+ * @swagger
+ * /users/account:
+ *   delete:
+ *     summary: Delete user account
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Account deleted successfully
+ *       401:
+ *         description: Unauthorized
+ */
 router.delete("/account", auth, deleteAccount);
 
 module.exports = router;

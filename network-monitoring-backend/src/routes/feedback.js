@@ -12,19 +12,73 @@ const {
 } = require("../middleware/validation");
 const auth = require("../middleware/auth");
 
-// @route   POST /api/feedback
-// @desc    Create feedback
-// @access  Private
+/**
+ * @swagger
+ * tags:
+ *   name: Feedback
+ *   description: Feedback management
+ */
+
+/**
+ * @swagger
+ * /feedback:
+ *   post:
+ *     summary: Create feedback
+ *     tags: [Feedback]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Feedback'
+ *     responses:
+ *       201:
+ *         description: Feedback created successfully
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ */
 router.post("/", auth, validateFeedback, checkValidation, createFeedback);
 
-// @route   GET /api/feedback
-// @desc    Get user's feedback
-// @access  Private
+/**
+ * @swagger
+ * /feedback:
+ *   get:
+ *     summary: Get user's feedback
+ *     tags: [Feedback]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: A list of feedback
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Feedback'
+ *       401:
+ *         description: Unauthorized
+ */
 router.get("/", auth, getFeedback);
 
-// @route   GET /api/feedback/stats
-// @desc    Get feedback statistics
-// @access  Private
+/**
+ * @swagger
+ * /feedback/stats:
+ *   get:
+ *     summary: Get feedback statistics
+ *     tags: [Feedback]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Feedback statistics
+ *       401:
+ *         description: Unauthorized
+ */
 router.get("/stats", auth, getFeedbackStats);
 
 module.exports = router;

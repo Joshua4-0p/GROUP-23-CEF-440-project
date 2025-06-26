@@ -6,9 +6,159 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
+const swaggerUi = require('swagger-ui-express');
+const swaggerJSDoc = require('swagger-jsdoc');
 
 // Create Express app
 const app = express();
+
+// Swagger Configuration
+const swaggerDefinition = {
+  openapi: '3.0.0',
+  info: {
+    title: 'Network Monitoring API',
+    version: '1.0.0',
+    description: 'API for monitoring network performance, managing users, and collecting feedback.',
+    contact: {
+      name: 'API Support',
+      email: 'support@joshuaboma.com'
+    }
+  },
+  servers: [
+    {
+      url: 'http://localhost:5000/api',
+      description: 'Development server'
+    },
+    {
+      url: 'your-deployed-url/api',
+      description: 'Production server'
+    }
+  ],
+  components: {
+    securitySchemes: {
+      bearerAuth: {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+      }
+    },
+    schemas: {
+      UserRegistration: {
+        type: 'object',
+        required: ['name', 'email', 'password'],
+        properties: {
+          name: { type: 'string', example: 'John Doe' },
+          email: { type: 'string', example: 'john@example.com' },
+          password: { type: 'string', example: 'PPPPassword123' },
+          deviceId: { type: 'string', example: 'device-xyz' },
+          preferences: {
+            type: 'object',
+            properties: {
+              network: { type: 'string', enum: ['MTN', 'Orange', 'Camtel'], example: 'MTN' },
+              anonymize: { type: 'boolean', example: false },
+              dataSharing: { type: 'boolean', example: true }
+            }
+          }
+        }
+      },
+      UserLogin: {
+        type: 'object',
+        required: ['email', 'password'],
+        properties: {
+          email: { type: 'string', example: 'john@example.com' },
+          password: { type: 'string', example: 'Password123' }
+        }
+      },
+      NetworkMetrics: {
+        type: 'object',
+        required: [
+          'deviceId', 'timestamp', 'connectionType', 'isConnected', 'downloadSpeed', 'downloadStatus', 'uploadSpeed', 'uploadStatus', 'latency', 'latencyStatus'
+        ],
+        properties: {
+          deviceId: { type: 'string', example: 'device-xyz' },
+          timestamp: { type: 'string', format: 'date-time', example: '2024-06-26T12:00:00Z' },
+          connectionType: { type: 'string', enum: ['wifi', 'cellular', 'ethernet', 'unknown'], example: 'wifi' },
+          isConnected: { type: 'boolean', example: true },
+          isInternetReachable: { type: 'boolean', example: true },
+          signalStrength: { type: 'number', example: -70 },
+          downloadSpeed: { type: 'number', example: 25.5 },
+          downloadStatus: { type: 'string', enum: ['excellent', 'good', 'fair', 'poor'], example: 'good' },
+          uploadSpeed: { type: 'number', example: 10.2 },
+          uploadStatus: { type: 'string', enum: ['excellent', 'good', 'fair', 'poor'], example: 'good' },
+          latency: { type: 'number', example: 50 },
+          latencyStatus: { type: 'string', enum: ['excellent', 'good', 'fair', 'poor'], example: 'good' },
+          location: {
+            type: 'object',
+            properties: {
+              latitude: { type: 'number', example: 4.0511 },
+              longitude: { type: 'number', example: 9.7679 },
+              accuracy: { type: 'number', example: 10 }
+            }
+          }
+        }
+      },
+      Feedback: {
+        type: 'object',
+        required: ['experience', 'areaOfFeedback', 'description', 'rating'],
+        properties: {
+          experience: { type: 'string', enum: ['excellent', 'good', 'fair', 'poor'], example: 'good' },
+          areaOfFeedback: {
+            type: 'string',
+            enum: ['call_quality', 'data_speed', 'network_coverage', 'customer_service', 'billing', 'other'],
+            example: 'data_speed'
+          },
+          description: { type: 'string', example: 'Internet speed is slow in my area.' },
+          rating: { type: 'number', minimum: 1, maximum: 5, example: 3 },
+          location: {
+            type: 'object',
+            properties: {
+              latitude: { type: 'number', example: 4.0511 },
+              longitude: { type: 'number', example: 9.7679 }
+            }
+          },
+          networkProvider: { type: 'string', enum: ['MTN', 'Orange', 'Camtel'], example: 'MTN' },
+          resolved: { type: 'boolean', example: false }
+        }
+      },
+      DailyData: {
+        type: 'object',
+        required: [
+          'date', 'downloadSpeed', 'uploadSpeed', 'latency', 'location', 'timestamp'
+        ],
+        properties: {
+          date: { type: 'string', format: 'date', example: '2024-06-26' },
+          downloadSpeed: { type: 'number', example: 20.5 },
+          uploadSpeed: { type: 'number', example: 8.3 },
+          latency: { type: 'number', example: 60 },
+          location: {
+            type: 'object',
+            required: ['latitude', 'longitude'],
+            properties: {
+              latitude: { type: 'number', example: 4.0511 },
+              longitude: { type: 'number', example: 9.7679 },
+              accuracy: { type: 'number', example: 10 }
+            }
+          },
+          timestamp: { type: 'number', example: 1719408000 },
+          avgSignalStrength: { type: 'number', example: -65 },
+          connectionType: { type: 'string', example: 'cellular' }
+        }
+      }
+    }
+  },
+  security: [{
+    bearerAuth: []
+  }]
+};
+
+const options = {
+  swaggerDefinition,
+  apis: ['./src/routes/*.js'], // Path to the API docs
+};
+
+const swaggerSpec = swaggerJSDoc(options);
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Security middleware
 app.use(helmet());
