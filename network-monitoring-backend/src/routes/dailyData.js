@@ -8,19 +8,73 @@ const {
 } = require("../controllers/dailyDataController");
 const auth = require("../middleware/auth");
 
-// @route   POST /api/daily-data
-// @desc    Create daily data entry
-// @access  Private
+/**
+ * @swagger
+ * tags:
+ *   name: Daily Data
+ *   description: Daily data management
+ */
+
+/**
+ * @swagger
+ * /daily-data:
+ *   post:
+ *     summary: Create daily data entry
+ *     tags: [Daily Data]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/DailyData'
+ *     responses:
+ *       201:
+ *         description: Daily data created successfully
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ */
 router.post("/", auth, createDailyData);
 
-// @route   GET /api/daily-data
-// @desc    Get daily data
-// @access  Private
+/**
+ * @swagger
+ * /daily-data:
+ *   get:
+ *     summary: Get daily data
+ *     tags: [Daily Data]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: A list of daily data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/DailyData'
+ *       401:
+ *         description: Unauthorized
+ */
 router.get("/", auth, getDailyData);
 
-// @route   GET /api/daily-data/stats
-// @desc    Get daily data statistics
-// @access  Private
+/**
+ * @swagger
+ * /daily-data/stats:
+ *   get:
+ *     summary: Get daily data statistics
+ *     tags: [Daily Data]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Daily data statistics
+ *       401:
+ *         description: Unauthorized
+ */
 router.get("/stats", auth, getDailyDataStats);
 
 module.exports = router;
